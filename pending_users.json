@@ -1,0 +1,18 @@
+[
+  {
+    "username": "aaa",
+    "email": "in2030v@gmail.com",
+    "password": "scrypt:32768:8:1$Xzgw7kWSdREsrXYs$450765ec3399aa161ba413d33b77ed2b893e13682f932c68d3906785becf74bc6778308ba1d8e4a08844f7de2f0ae07df8864ad301ea4145178cb31af5a0c0b8",
+    "security_question": "dd",
+    "security_answer": "dd",
+    "otp": "539299"
+  },
+  {
+    "username": "admin",
+    "email": "aayushlamsal.al@gmail.com",
+    "password": "scrypt:32768:8:1$dyIU2O0oIledfNbj$ae2035e455e545ddc15951c4abcbbd0df3c8e34cd08fe93a00e6ddfbf2863312782b72f5099fe20b272ab19c60f7d2f7a609df5f93e5e2d83fa80b2b5257e05f",
+    "security_question": "123",
+    "security_answer": "123",
+    "otp": "316946"
+  }
+]

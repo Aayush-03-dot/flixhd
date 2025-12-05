@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Page Not Found - FlixHD</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-xicon" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            redHover: '#c11119',
+                            dark: '#141414',
+                        }
+                    },
+                    animation: {
+                        'float-up': 'floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        floatUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- OTT Background & Layout --- */
+        body {
+            background-color: #000;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: #fff;
+            overflow: hidden; /* Prevent scrolling on 404 */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Cinematic Background */
+        .ott-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=1931&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        /* Vignette Overlay */
+        .vignette-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.9) 60%, rgba(0,0,0,1) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Glass Card --- */
+        .error-card {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- Big 404 Number --- */
+        .error-number {
+            font-size: 10rem;
+            font-weight: 900;
+            line-height: 1;
+            /* Gradient Text */
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background-color: #e50914;
+            color: white;
+            font-weight: 700;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+        .btn-primary:hover:not(.disabled) {
+            background-color: #c11119;
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+        }
+        .btn-primary.disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Layers -->
+    <div class="ott-background"></div>
+    <div class="vignette-overlay"></div>
+
+    <!-- Header (Logo) -->
+    <header class="absolute top-0 left-0 w-full p-6 md:p-10 z-20 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="group block transition-transform hover:scale-105 duration-300">
+            <div class="text-4xl md:text-5xl font-extrabold tracking-tighter text-brand-red drop-shadow-2xl">
+                Flix<span class="text-white">HD</span>
+            </div>
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center w-full px-4 relative z-10">
+        
+        <div class="error-card w-full max-w-[500px] p-8 sm:p-14 rounded-3xl opacity-0 animate-float-up text-center relative overflow-hidden">
+            
+            <!-- Giant Background Number -->
+            <div class="error-number">404</div>
+
+            <!-- Content -->
+            <div class="relative z-10 mt-12">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4 drop-shadow-md">Lost in the Void?</h2>
+                
+                <p class="text-[#b3b3b3] text-lg leading-relaxed mb-8">
+                    It looks like Thanos snapped his fingers and this page has vanished into thin air. Don't worry, you can always return to your main reality.
+                </p>
+
+                <a href="/" id="returnRealityButton" class="btn-primary w-full py-4 text-lg flex justify-center items-center gap-2 group">
+                    <span id="buttonText">Return to my reality</span>
+                    <!-- Spinner SVG -->
+                    <svg id="buttonSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full absolute bottom-0 left-0 py-8 z-20">
+        <div class="flex flex-col items-center justify-center gap-4 text-[#737373] text-[13px] font-medium">
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white hover:underline transition-colors">Terms of Use</a>
+                <a href="#" class="hover:text-white hover:underline transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-white hover:underline transition-colors">Help Center</a>
+            </div>
+            <p class="opacity-60">&copy; 2025 FlixHD Inc.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Interaction Logic
+        const returnButton = document.getElementById('returnRealityButton');
+        const buttonText = document.getElementById('buttonText');
+        const buttonSpinner = document.getElementById('buttonSpinner');
+
+        if(returnButton) {
+            returnButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Stop immediate navigation
+
+                // Loading State
+                buttonText.textContent = 'Returning to reality...';
+                buttonSpinner.classList.remove('hidden');
+                returnButton.classList.add('disabled', 'pointer-events-none');
+
+                // Simulate brief delay for effect
+                setTimeout(() => {
+                    window.location.href = '/'; 
+                }, 1500); 
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.title }} - FlixHD </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Exo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon/favicon-movie.png') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        /* Your existing CSS here */
+        :root {
+            --bg-dark-1: #101010;
+            --bg-dark-1-rgb: 16,16,16;
+            --bg-dark-2: #181818;
+            --bg-dark-2-rgb: 24, 24, 24;
+            --bg-dark-3: #222222;
+            --text-light: #E0E0E0;
+            --text-muted: #858585;
+            --text-footer-headings: #b0b0b0;
+            --accent-primary: #FF8C00;
+            --accent-primary-rgb: 255, 140, 0;
+            --accent-secondary: #E57E00;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --card-shadow-light: rgba(0, 0, 0, 0.3);
+            --card-shadow-hover: rgba(var(--accent-primary-rgb), 0.2);
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Exo 2', sans-serif;
+        }
+        body {
+            margin: 0;
+            font-family: var(--font-main);
+            background-color: var(--bg-dark-1);
+            color: var(--text-light);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(var(--bg-dark-2-rgb), 0.35) 0%, var(--bg-dark-1) 75%);
+            background-attachment: fixed;
+             /* Adjust as needed */
+        }
+        .main-content-area { flex-grow: 1; }
+        
+        /* Reverted .container to its default Bootstrap behavior for smaller screens */
+        /* It will have max-width and margins for mobile/tablet */
+        .container {
+            /* Bootstrap's default .container styles will apply here,
+               e.g., max-width: 540px, 720px, etc. at different breakpoints, and margin: auto */
+            padding-left: var(--bs-gutter-x, .75rem); /* Default Bootstrap horizontal padding */
+            padding-right: var(--bs-gutter-x, .75rem);
+        }
+
+        /* NEW: Make .container fluid (full width) only for large screens and up */
+        @media (min-width: 992px) { /* Corresponds to Bootstrap's 'lg' breakpoint */
+            .container {
+                max-width: 100% !important; /* Force full width on large screens */
+                /* Optionally set padding-left/right to 0 if you want truly edge-to-edge content on large screens */
+                /* padding-left: 0 !important; */
+                /* padding-right: 0 !important; */
+            }
+        }
+
+        .breadcrumb-bar { background-color: var(--bg-dark-2); padding: 10px 0; font-size: 0.9rem; border-bottom: 1px solid var(--border-subtle); }
+        .breadcrumb-bar .container a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-bar .container a:hover { color: var(--accent-primary); }
+        .breadcrumb-bar .container span { color: var(--text-muted); margin: 0 5px; }
+        .breadcrumb-bar .container .current-page { color: var(--text-light); }
+        .movie-hero-section { position: relative; padding: clamp(30px, 8vh, 60px) 0; background-size: cover; background-position: center top; background-repeat: no-repeat; min-height: 55vh; display: flex; align-items: center; }
+        .movie-hero-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, var(--bg-dark-1) 5%, rgba(var(--bg-dark-1-rgb),0.7) 40%, rgba(var(--bg-dark-1-rgb),0.4) 70%, rgba(var(--bg-dark-1-rgb),0.8) 100%); z-index: 1; }
+        .movie-hero-section .container { position: relative; z-index: 2; } /* Reverted selector */
+        .hero-content { display: flex; gap: clamp(20px, 4vw, 40px); align-items: flex-start; }
+        .hero-poster img { content: url('{{ item.poster_url if item.poster_url else (url_for('uploaded_file', filename=item.thumbnail) if item.thumbnail else 'https://via.placeholder.com/280x420/181818/858585.png?text=No+Poster') }}'); width: clamp(200px, 25vw, 280px); height: auto; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--border-subtle); }
+        .hero-details { flex: 1; padding-top: clamp(0px, 2vh, 20px); }
+        .hero-title { font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #fff; margin-bottom: 10px; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,0.7); }
+        .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 15px; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted); }
+        .hero-meta span { display: inline-flex; align-items: center; }
+        .hero-meta .rating { color: var(--accent-primary); font-weight: 700; }
+        .hero-meta .rating i { margin-right: 5px; }
+        .hero-meta .genre-tag { background-color: rgba(var(--accent-primary-rgb), 0.15); color: var(--accent-primary); padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: 500; border: 1px solid rgba(var(--accent-primary-rgb), 0.3); }
+        .hero-tagline { font-size: clamp(0.95rem, 2vw, 1.1rem); font-style: italic; color: var(--text-light); margin-bottom: 20px; opacity: 0.9; }
+        .hero-description { font-size: clamp(0.9rem, 1.8vw, 1rem); line-height: 1.6; color: var(--text-light); margin-bottom: 25px; max-width: 700px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .hero-actions .btn { font-family: var(--font-heading); font-weight: 600; padding: 10px 25px; border-radius: 25px; text-decoration: none; margin-right: 10px; margin-bottom:10px; transition: all 0.3s ease; font-size: clamp(0.9rem, 1.8vw, 1rem); display: inline-flex; align-items: center; gap: 8px; }
+        .hero-actions .btn-primary { background-color: var(--accent-primary); color: var(--bg-dark-1); border: 2px solid var(--accent-primary); }
+        .hero-actions .btn-primary:hover { background-color: var(--accent-secondary); border-color: var(--accent-secondary); transform: translateY(-3px); box-shadow: 0 4px 15px rgba(var(--accent-primary-rgb), 0.3); }
+        /* Style for the new download button */
+        .hero-actions .btn-download {
+            background-color: #e12b28; /* A standard blue for download */
+            color: #fff;
+            border: 2px solid #ea312e;
+        }
+        .hero-actions .btn-download:hover {
+            background-color: #ff1e00c7;
+            color: #222222;
+            border-color: #f60303;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        .page-section { padding: clamp(1.5rem, 4vw, 2.5rem) 0; background-color: var(--bg-dark-2); margin-bottom: 1px; }
+        .page-section:nth-child(even) { background-color: var(--bg-dark-1); }
+        .section-heading { font-family: var(--font-heading); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text-light); margin-bottom: clamp(1rem, 2.5vw, 1.5rem); display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--accent-primary); padding-bottom: 10px; }
+        .player-section .player-container { background-color: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; margin: 0 auto; aspect-ratio: 16 / 9; max-height: 75vh; position: relative; }
+        .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .player-section .player-info-text { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: clamp(0.5rem, 1.5vw, 1rem); }
+        .series-selector { margin-top: clamp(1.5rem, 4vw, 2.5rem); }
+        .accordion-item { background-color: var(--bg-dark-3); border: 1px solid var(--border-subtle); margin-bottom: 5px; border-radius: 8px !important; }
+        .accordion-header .accordion-button { background-color: var(--bg-dark-3); color: var(--text-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.2rem; border-radius: 8px !important; box-shadow: none; }
+        .accordion-button:not(.collapsed) { background-color: var(--bg-dark-2) !important; color: var(--accent-primary) !important; box-shadow: inset 0 -1px 0 var(--border-subtle) !important; }
+        .accordion-button::after { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e0e0e0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); }
+        .accordion-button:not(.collapsed)::after { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ff8c00'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); }
+        .accordion-body { background-color: var(--bg-dark-1); padding: 0; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+        .episode-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+        .episode-list .episode-item { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; transition: background-color 0.2s ease; }
+        .episode-list .episode-item:last-child { border-bottom: none; }
+        .episode-list .episode-item:hover { background-color: var(--bg-dark-3); }
+        .episode-list .episode-item.active { background-color: rgba(var(--accent-primary-rgb), 0.15); border-left: 4px solid var(--accent-primary); padding-left: 16px; }
+        .episode-list .episode-item .ep-num { color: var(--text-muted); font-weight: 600; margin-right: 15px; min-width: 25px; }
+        .episode-list .episode-item .ep-title { color: var(--text-light); flex-grow: 1; }
+        .episode-list .episode-item.active .ep-title { color: var(--accent-primary); font-weight: 600; }
+        .episode-list .episode-item .ep-play-icon { color: var(--accent-primary); font-size: 1.5rem; opacity: 0; transition: opacity 0.2s ease; }
+        .episode-list .episode-item:hover .ep-play-icon, .episode-list .episode-item.active .ep-play-icon { opacity: 1; }
+        .overview-section .full-synopsis { font-size: 1.05rem; line-height: 1.8; margin-bottom: clamp(1.5rem, 4vw, 2.5rem); color: var(--text-light); }
+        .overview-section .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: clamp(1rem, 2.5vw, 1.5rem); margin-bottom: clamp(1.5rem, 4vw, 2.5rem); }
+        .overview-section .detail-item strong { color: var(--text-muted); font-weight: 600; margin-right: 8px; display: block; margin-bottom: 4px; }
+        .overview-section .detail-item span { color: var(--text-light); }
+        .cast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: clamp(1rem, 2.5vw, 1.5rem); }
+        .cast-member { text-align: center; }
+        .cast-member img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; background-color: var(--bg-dark-3); }
+        .cast-member .name { font-size: 0.9rem; font-weight: 500; color: var(--text-light); }
+        .related-movies-grid { display: grid; gap: clamp(1rem, 2.5vw, 1.5rem); grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        .related-movies-grid .movie-card-link { text-decoration: none; display: flex; flex-direction: column; height: 100%; border-radius: 10px; transition: all 0.35s ease; background-color: var(--bg-dark-3); }
+        .related-movies-grid .movie-card-link:hover { transform: translateY(-8px) scale(1.04); box-shadow: 0 12px 28px var(--card-shadow-light), 0 0 20px var(--card-shadow-hover); background-color: var(--bg-dark-2); }
+        .related-movies-grid .movie-poster { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px 8px 0 0; background-color: var(--bg-dark-1); }
+        .related-movies-grid .movie-info { padding: clamp(0.5rem, 1.5vw, 1rem); }
+        .related-movies-grid .movie-title { font-family: var(--font-heading); font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 600; color: var(--text-light); line-height: 1.35; height: calc(0.9rem * 1.35 * 2); max-height: calc(0.9rem * 1.35 * 2); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 0.2rem; }
+        .related-movies-grid .movie-meta { font-size: clamp(0.7rem, 1.5vw, 0.75rem); color: var(--text-muted); line-height: 1.2; height: calc(0.75rem * 1.2 * 1); max-height: calc(0.75rem * 1.2 * 1); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .related-movies-grid .movie-card-link:hover .movie-title { color: var(--accent-primary); }
+        .site-footer { background-color: #000000; color: var(--text-muted); padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(1rem, 2.5vw, 1.5rem) 0; margin-top: auto; border-top: 1px solid var(--border-subtle); font-size: 0.9rem; }
+        .site-footer .footer-brand { font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-light); margin-bottom: 0.5rem; display: block; text-decoration: none; }
+        .site-footer .footer-brand .logo-hd { color: var(--accent-primary); font-weight: 900; }
+        .site-footer .footer-tagline { font-size: 0.85rem; margin-bottom: 1.5rem; max-width: 300px; }
+        .site-footer .footer-heading { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text-footer-headings); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .site-footer .footer-heading2 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text-footer-headings); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .site-footer .footer-links { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .site-footer .footer-links li { margin-bottom: 0.6rem; }
+        .site-footer .footer-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s ease, padding-left 0.2s ease; display: inline-block; }
+        .site-footer .footer-links a:hover { color: var(--accent-primary); padding-left: 5px; }
+        .site-footer .footer-bottom { border-top: 1px solid var(--border-subtle); margin-top: clamp(1.5rem, 4vw, 2.5rem); padding-top: clamp(1rem, 2.5vw, 1.5rem); text-align: center; font-size: 0.8rem; }
+        .site-footer .footer-bottom p { margin-bottom: 0.25rem; }
+        .site-footer .footer-bottom a { color: red; }
+        .site-footer .footer-bottom a:hover { color: var(--accent-primary); text-decoration: underline; }
+        @media (max-width: 992px) { .hero-content { flex-direction: column; align-items: center; text-align: center; } .hero-poster img { width: clamp(180px, 30vw, 220px); margin-bottom: 20px; } .hero-details { padding-top: 0; align-items: center; } .hero-description { max-width: 100%; -webkit-line-clamp: 4; } .hero-actions { text-align: center; } .related-movies-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
+        @media (max-width: 768px) { .hero-actions .btn { width: auto; padding: 10px 20px; font-size: 0.9rem; } .overview-section .details-grid { grid-template-columns: 1fr; } .related-movies-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } .site-footer .footer-brand, .site-footer .footer-tagline { text-align: center; margin-left: auto; margin-right: auto; } .site-footer .footer-heading { margin-top: 1.5rem; } .site-footer .footer-links { text-align: center; } }
+        @media (max-width: 576px) { .hero-poster img { width: clamp(150px, 45vw, 180px); } .hero-title { font-size: clamp(1.8rem, 7vw, 2.5rem); } .hero-meta { font-size: 0.85rem; justify-content: center; } .hero-meta .genre-tag { font-size: 0.75rem; padding: 3px 8px;} .hero-actions .btn { width: 100%; margin-right: 0; } .section-heading { font-size: clamp(1.3rem, 2.5vw, 1.7rem); } .player-section .player-container { max-height: 45vh; } .related-movies-grid { grid-template-columns: repeat(2, 1fr); gap: clamp(0.5rem, 1.5vw, 1rem); } .related-movies-grid .movie-title { height: calc(0.8rem * 1.35 * 2); max-height: calc(0.8rem * 1.35 * 2); font-size: clamp(0.75rem, 2.5vw, 0.8rem); } .related-movies-grid .movie-meta { height: calc(0.7rem * 1.2 * 1); max-height: calc(0.7rem * 1.2 * 1); font-size: clamp(0.65rem, 2vw, 0.7rem); } 
+        .footer-heading{
+            margin-left: 45px;
+        }
+        
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content-area">
+        <div class="breadcrumb-bar">
+            <div class="container"> <a href="{{ url_for('index') }}">Home</a>
+                <span>/</span>
+                <a href="{{ url_for('index', category='all-movies' if item.content_type == 'movie' else 'all-series') }}">{{ 'Movies' if item.content_type == 'movie' else 'Series' }}</a>
+                <span>/</span>
+                <span class="current-page">{{ item.title }}</span>
+            </div>
+        </div>
+
+        <section class="movie-hero-section" style="background-image: url('{{ item.backdrop_display }}');"> {# Changed to backdrop_display for better hero section look #}
+            <div class="container"> <div class="hero-content">
+                    <div class="hero-poster">
+                        <img src="{{ item.poster_url if item.poster_url else (url_for('uploaded_file', filename=item.thumbnail) if item.thumbnail else 'https://via.placeholder.com/280x420/181818/858585.png?text=No+Poster') }}" alt="{{ item.title }} Poster" onerror="this.onerror=null; this.src='https://via.placeholder.com/280x420/181818/858585.png?text=No+Poster';"/>
+                    </div>
+                    <div class="hero-details">
+                        <h1 class="hero-title">{{ item.title }}</h1>
+                        <div class="hero-meta">
+                            {% if item.release_date %}<span><i class="bi bi-calendar3"></i> {{ item.release_date[:4] }}</span>{% endif %}
+                            {# Removed item.runtime as it's not in your Movie model #}
+                        </div>
+                        <div class="hero-meta genres">
+                             {% if item.genre_list %}
+                                 {% for g in item.genre_list %}
+                                     <span class="genre-tag">{{ g }}</span>
+                                 {% endfor %}
+                             {% else %}
+                                 <span class="genre-tag">N/A</span>
+                             {% endif %}
+                        </div>
+                        <p class="hero-description">{{ item.description | default('No detailed description available.', true) | striptags | truncate(250) }}</p>
+                                    <div class="hero-actions">
+                <a href="#movie-player-section" class="btn btn-primary">
+                    <i class="bi bi-play-circle-fill"></i> {{ 'Play Series' if item.content_type == 'series' else 'Play Movie' }}
+                </a>
+                {# MODIFIED: Download Button now works for both movies and series #}
+                {% if item.download_url %}
+                    <a href="{{ url_for('download_content', content_type=item.content_type, content_id=item.id) }}" class="btn btn-download" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-download"></i> Download {{ 'Series' if item.content_type == 'series' else 'Movie' }}
+                    </a>
+                {% else %}
+                    {# Optional: Show a disabled button or nothing if no download link is available #}
+                    <span class="btn btn-download disabled">
+                        <i class="bi bi-download"></i> Download {{ 'Series' if item.content_type == 'series' else 'Movie' }}
+                    </span>
+                {% endif %}
+            </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-section player-section" id="movie-player-section">
+            <div class="container"> <h2 class="section-heading"><i class="bi bi-film"></i> Watch Now</h2>
+                <div class="player-container">
+
+                    {% if item.content_type == 'movie' %}
+                        {% if item.embed_code %}{{ item.embed_code | safe }}{% else %}<p>Video not available.</p>{% endif %}
+
+                    {% elif item.content_type == 'series' %}
+                        {# This logic might need refinement if you want to initially load a specific episode.
+                            Currently, it loads the first episode of the first season if available. #}
+                        {% if item.seasons and item.seasons[0].episodes %}
+                            {{ item.seasons[0].episodes[0].embed_code | safe }}
+                        {% else %}
+                            <p>No episodes available.</p>
+                        {% endif %}
+                    {% endif %}
+
+                </div>
+
+                {% if item.content_type == 'series' and item.seasons %}
+                <div class="series-selector">
+                    <div class="accordion" id="seasonsAccordion">
+
+                        {% for season in item.seasons %}
+                        {% set is_first_season = loop.first %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-season-{{ loop.index }}">
+                                <button class="accordion-button {% if not is_first_season %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-season-{{ loop.index }}" aria-expanded="{{ 'true' if is_first_season else 'false' }}" aria-controls="collapse-season-{{ loop.index }}">
+                                    Season {{ loop.index }}
+                                </button>
+                            </h2>
+                            <div id="collapse-season-{{ loop.index }}" class="accordion-collapse collapse {% if is_first_season %}show{% endif %}" aria-labelledby="heading-season-{{ loop.index }}">
+                                <div class="accordion-body">
+                                    <ul class="episode-list">
+                                        {% for episode in season.episodes %}
+                                        <li class="episode-item episode-play-btn {% if is_first_season and loop.first %}active{% endif %}" data-template-id="ep-{{ season.id }}-{{ episode.id }}">
+                                            <span class="ep-num">{{ episode.number }}</span>
+                                            <span class="ep-title">{{ episode.title | default('Episode ' ~ episode.number) }}</span>
+                                            <i class="bi bi-play-circle-fill ep-play-icon"></i>
+                                            <template id="ep-{{ season.id }}-{{ episode.id }}">{{ episode.embed_code | safe }}</template>
+                                        </li>
+                                        {% else %}
+                                        <li class="episode-item" style="justify-content: center; color: var(--text-muted);">No episodes in this season yet.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="page-section overview-section">
+            <div class="container"> <h2 class="section-heading"><i class="bi bi-info-lg"></i> Overview & Details</h2>
+                <div class="full-synopsis">
+                    <p>{{ item.description | default("No detailed description available.", true) | striptags }}</p>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item"><strong>Title:</strong> <span>{{ item.title }}</span></div>
+                    <div class="detail-item"><strong>Release Date:</strong> <span>{{ item.release_date | default('N/A') }}</span></div>
+                    <div class="detail-item"><strong>Genres:</strong> <span>{{ item.genre if item.genre else 'N/A' }}</span></div>
+                    <div class="detail-item">
+                        <strong>{{ 'Creator' if item.content_type == 'series' else 'Director' }}:</strong>
+                        <span>{{ item.director | default('N/A') }}</span>
+                    </div>
+                </div>
+                <h3 class="section-heading" style="font-size: 1.5rem; margin-top: clamp(1.5rem, 4vw, 2.5rem); border-top: 1px solid var(--border-subtle); padding-top: clamp(1rem, 2.5vw, 1.5rem);"><i class="bi bi-people-fill"></i> Cast</h3>
+                <div class="cast-grid">
+                    {% if cast %}
+                        {% for actor in cast %}
+                        <div class="cast-member">
+                            {% if actor.profile_path %}
+                                <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" alt="{{ actor.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/80x80/333333/858585.png?text={{ actor.name[0] | upper if actor.name else '?' }}" alt="{{ actor.name }}">
+                            {% endif %}
+                            <div class="name">{{ actor.name }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p>No cast information available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        {% if related_movies and related_movies|length > 0 %}
+        <section class="page-section related-movies-section">
+            <div class="container"> <h2 class="section-heading"><i class="bi bi-collection-play-fill"></i> You Might Also Like</h2>
+                <div class="related-movies-grid">
+                    {% for related in related_movies %}
+                    <a href="{{ url_for('series_detail', series_id=related.id) if related.content_type == 'series' else url_for('movie_detail', movie_id=related.id) }}" class="movie-card-link">
+                        <div class="movie-card-content">
+                            <img src="{{ related.thumbnail_display }}" alt="{{ related.title }} Poster" class="movie-poster" onerror="this.onerror=null; this.src='https://via.placeholder.com/140x210/181818/858585.png?text=N/A';"/>
+                            <div class="movie-info">
+                                <p class="movie-title">{{ related.title }}</p>
+                                {% if related.release_date %}<p class="movie-meta">{{ related.release_date[:4] }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+    <footer class="site-footer">
+        <div class="container"> <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <a class="footer-brand" href="{{ url_for('index') }}">
+                        <span class="logo-hd">Flix</span>HD
+                    </a>
+                    <p class="footer-tagline">Your ultimate destination for a cinematic universe, streamed directly to you.</p>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4 mb-lg-0">
+                    <h5 class="footer-heading">Explore</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('index', category='all-movies') }}">Movies</a></li>
+                        <li><a href="{{ url_for('index', category='all-series') }}">Web Series</a></li>
+                        
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-3 col-6 mb-4 mb-lg-0">
+                    <h5 class="footer-heading">Support</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('contact') }}">Contact Us</a></li> {# Changed to use url_for #}
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4 mb-lg-0">
+                     <h5 class="footer-heading2">Connect</h5>
+                     <p>Follow us on social media for the latest updates and releases.</p>
+                     <div class="social-links">
+                             <a href="#" class="me-2" aria-label="Facebook" style="color: var(--text-muted); font-size: 1.5rem;"><i class="bi bi-facebook"></i></a>
+                             <a href="#" class="me-2" aria-label="Twitter" style="color: var(--text-muted); font-size: 1.5rem;"><i class="bi bi-twitter-x"></i></a>
+                             <a href="#" aria-label="Instagram" style="color: var(--text-muted); font-size: 1.5rem;"><i class="bi bi-instagram"></i></a>
+                     </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy;FlixHD. All Rights Reserved.</p>
+                
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playerContainer = document.querySelector('.player-container');
+            const episodeButtons = document.querySelectorAll('.episode-play-btn');
+
+            episodeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const templateId = this.dataset.templateId;
+                    const template = document.getElementById(templateId);
+
+                    if (playerContainer && template) {
+                        playerContainer.innerHTML = template.innerHTML;
+                        episodeButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        playerContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

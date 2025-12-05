@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - FlixHD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style2.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-aurora">
+
+    <a href="{{ url_for('index') }}" class="home-link">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                    <div class="toast-notification success">
+                        <div class="toast-icon">
+                            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                        </div>
+                        <div class="toast-message">
+                            <strong>Success!</strong>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% elif category == 'error' %}
+                    <div class="toast-notification error">
+                        <div class="toast-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="error-icon">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                        </div>
+                        <div class="toast-message">
+                            <strong>Error!</strong>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% elif category == 'info' %}
+                    <div class="toast-notification info">
+                        <div class="toast-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="info-icon">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <div class="toast-message">
+                            <strong>Info!</strong>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <main class="content-wrapper">
+        <div class="form-card">
+            <div class="card-header">
+                <h2>Contact Us</h2>
+                <p>Send us a message and we'll get back to you as soon as possible.</p>
+            </div>
+
+            <div class="notice-board">
+                <div class="notice-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 11V17H13V11H11ZM11 7V9H13V7H11Z"></path></svg>
+                </div>
+                <div class="notice-text">
+                    <strong>Please be patient:</strong>
+                    <p>We aim to respond to all inquiries within 24-48 hours. Thank you for your understanding!</p>
+                </div>
+            </div>
+
+            <form id="contact-form" method="POST" action="{{ url_for('contact') }}">
+                {{ form.hidden_tag() }} {# This renders the CSRF token #}
+
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your full name" value="{{ name|default('') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" value="{{ email|default('') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject (Optional)</label>
+                    <input type="text" id="subject" name="subject" placeholder="e.g., Bug Report, Feature Request" value="{{ subject|default('') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" rows="6" placeholder="Tell us what's on your mind..." required>{{ message_content|default('') }}</textarea>
+                </div>
+
+                <button type="submit" class="submit-button">Send Message</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

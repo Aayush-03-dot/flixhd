@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit a Movie Request</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style2.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-aurora">
+
+    <a href="{{ url_for('index') }}" class="home-link">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                <div class="toast-notification success">
+                    <div class="toast-icon">
+                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                    <div class="toast-message">
+                        <strong>Success!</strong>
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <main class="content-wrapper">
+        <div class="form-card">
+            <div class="card-header">
+                <h2>Submit a Request</h2>
+                <p>Let us know what you'd like to see added to the collection.</p>
+            </div>
+
+            <div class="notice-board">
+                <div class="notice-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 11V17H13V11H11ZM11 7V9H13V7H11Z"></path></svg>
+                </div>
+                <div class="notice-text">
+                    <strong>A quick tip for faster requests:</strong>
+                    <p>Providing an IMDb or TMDb link is highly recommended for faster processing. Thank you!</p>
+                </div>
+            </div>
+
+            <form id="request-form" method="POST" action="{{ url_for('submit_request') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label for="movie-title">Movie Title</label>
+                    <input type="text" id="movie-title" name="movie-title" placeholder="e.g., Dune: Part Two" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="movie-link">IMDb or TMDb Link (Recommended)</label>
+                    <input type="url" id="movie-link" name="movie-link" placeholder="https://www.imdb.com/title/tt1160419">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Additional Notes (Optional)</label>
+                    <textarea id="notes" name="notes" placeholder="Any specific version or details..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-button">Send Request</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

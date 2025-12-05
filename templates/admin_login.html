@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-2025.0">
+    <title>FlixHD - Admin Login</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="icon" type="image/x-xicon" href="{{ url_for('static', filename='favicon/enter.png') }}"> {# Keeping original admin favicon #}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script> {# Using Lucide Icons for consistency #}
+
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* No scroll for fixed central content */
+            color: #212121;
+            position: relative;
+        }
+
+        /* Top-left logo - Consistent branding */
+        .header-logo {
+            position: absolute;
+            top: 1.5rem;
+            left: 3rem;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: -0.05em;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        .header-logo span {
+            color: #22c55e; /* Vibrant green accent */
+        }
+        .header-logo h1 {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            line-height: 1;
+        }
+
+        /* Main content wrapper - Adjusted for lower margin from top */
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Changed to flex-start to move content higher */
+            align-items: center;
+            padding: 1.5rem;
+            padding-top: 5rem; /* Added padding-top to push content down from the absolute header */
+            text-align: center;
+        }
+
+        /* Login/Admin Form Container - Consistent with login page */
+        .auth-form-container {
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        /* Input field styles - Consistent with login page */
+        .input-label {
+            display: block;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #555555;
+            margin-bottom: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border: 1px solid #c0c0c0;
+            border-radius: 9999px; /* Pill shape */
+            background-color: #ffffff;
+            color: #333333;
+            font-size: 1rem;
+            font-weight: 400;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .form-input:focus {
+            border-color: #000000;
+            box-shadow: #000000;
+            background-color: #fcfcfc;
+        }
+        .form-input::placeholder {
+            color: #a0a0a0;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #a0a0a0;
+            font-size: 1rem;
+            padding: 5px;
+        }
+        .toggle-password:hover {
+            color: #555555;
+        }
+        .toggle-password svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+
+        /* Primary button styles - Consistent with login page */
+        .btn-primary {
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            background-color: #0a0a0a; /* Green button */
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: 1px solid #282b29;
+            border-radius: 9999px; /* Pill shape */
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #2c2e2c;
+            /* transform: translateY(-2px); */
+            box-shadow: 0 6px 15px rgba(215, 228, 220, 0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Spinner for button */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Flash Message styling - Consistent with login page */
+        .flash-message-container {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 0.8rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-align: left;
+            margin-bottom: 10px;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        .flash-error {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #dc2626;
+        }
+        .flash-success {
+            background-color: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #16a34a;
+        }
+        .flash-message.hide {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+        .flash-message svg {
+            width: 1.2em;
+            height: 1.2em;
+            flex-shrink: 0;
+        }
+
+        /* Footer links - Consistent with login page */
+        .footer-links {
+            position: absolute;
+            bottom: 2rem;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #777777;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            font-weight: 500;
+        }
+        .footer-links a {
+            color: #777777;
+            text-decoration: none;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+        }
+        .footer-links a:hover {
+            color: #555555;
+            text-decoration: underline;
+        }
+
+        /* Checkbox styling (adapting from original) */
+        .options {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 0.85em;
+            width: 100%;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            color: #555555;
+        }
+        .remember-me input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #22c55e;
+            width: 1em;
+            height: 1em;
+            cursor: pointer;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .header-logo {
+                top: 1rem;
+                left: 1rem;
+                font-size: 2rem;
+            }
+            .title {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+            .form-input, .btn-primary {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+            .footer-links {
+                bottom: 1rem;
+                font-size: 0.75rem;
+                gap: 1rem;
+            }
+            .main-content-wrapper {
+                padding-top: 4rem; /* Reduce padding on small screens */
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-900 antialiased">
+
+
+
+    <div class="main-content-wrapper">
+        <div class="auth-form-container">
+            <h1 class="title">Admin Login</h1>
+            <p class="card-subtitle">Please present your credentials to enter</p>
+
+            <div class="flash-message-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == 'error' %}
+                                <div class="flash-message flash-error">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% else %}
+                                <div class="flash-message flash-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <form action="{{ url_for('admin_login') }}" method="post" id="adminLoginForm" class="space-y-2"> {# Changed space-y-3 to space-y-2 #}
+                {{ form.hidden_tag() }}
+                <div class="input-group">
+                    <label for="username" class="input-label">Username</label>
+                    <input name="username" type="text" id="username" placeholder="Enter your username" class="form-input" required>
+                </div>
+                <div class="input-group">
+                    <label for="password" class="input-label">Password</label>
+                    <div class="password-wrapper">
+                        <input name="password" type="password" id="password" placeholder="Enter your password" class="form-input" required>
+                        <span class="toggle-password" onclick="togglePasswordVisibility()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye" id="toggleIcon">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                </div>
+<br>
+                <button type="submit" class="btn-primary" id="adminSignInButton">
+                    <span id="buttonText">Sign In</span>
+                    <span id="buttonSpinner" class="spinner hidden"></span>
+                </button>
+            </form>
+        </div>
+        <footer class="footer-links">
+            <span>&copy; 2025 FlixHD Admin. All Rights Reserved.</span>
+        </footer>
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('lucide-eye');
+                toggleIcon.classList.add('lucide-eye-off');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('lucide-eye-off');
+                toggleIcon.classList.add('lucide-eye');
+            }
+            lucide.createIcons(); // Re-render Lucide icons after class change
+        }
+
+        // --- Button Loading State Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const signInButton = document.getElementById('adminSignInButton');
+            const buttonText = signInButton.querySelector('#buttonText');
+            const buttonSpinner = signInButton.querySelector('#buttonSpinner');
+            const adminLoginForm = document.getElementById('adminLoginForm');
+
+            adminLoginForm.addEventListener('submit', function(event) {
+                buttonText.textContent = 'Verifying...';
+                buttonSpinner.classList.remove('hidden');
+                signInButton.disabled = true;
+                // In a real application, you'd reset this state based on backend response
+                // Example simulation:
+                /*
+                setTimeout(() => {
+                    buttonText.textContent = 'Sign In';
+                    buttonSpinner.classList.add('hidden');
+                    signInButton.disabled = false;
+                }, 2000);
+                */
+            });
+
+            // --- Flash Message Auto-Hide Logic ---
+            const flashMessages = document.querySelectorAll('.flash-message');
+
+            flashMessages.forEach(message => {
+                const displayTime = 4000;
+                const fadeTime = 500;
+
+                setTimeout(() => {
+                    message.classList.add('hide');
+                    message.addEventListener('transitionend', () => {
+                        message.remove();
+                    });
+                }, displayTime);
+            });
+            // --- End Flash Message Auto-Hide Logic ---
+
+            // Initial rendering of Lucide icons for the page load
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

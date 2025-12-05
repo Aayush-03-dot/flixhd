@@ -1,0 +1,24 @@
+[
+  {
+    "username": "Admin",
+    "email": "aayush@admin.com",
+    "password": "scrypt:32768:8:1$pBBW5O1icWXPu93Q$634b5bb3421fc02cfd34b358960d7b4da688119e0c75b6385d2e9be63c0018f765288e0384d24411c3d9a7916ef12fd11ffaeb02dc68731180ac2af624726069",
+    "security_question": "Favourite place?",
+    "security_answer": "Butwal",
+    "role": "admin"
+  },
+  {
+    "username": "Aayush",
+    "email": "ayushlamsal9@gmail.com",
+    "password": "scrypt:32768:8:1$PEMvYYpH8Z5gQ2b8$1656aac10d57771214f9d3ed14976a73d3378701e346bce3b0e487a8d57157cda0dd36984c1b7833d324ec4d8edf1249805d5dd9cd0d39596178cc2b9dc543d5",
+    "security_question": "1111",
+    "security_answer": "2222"
+  },
+  {
+    "username": "Hero",
+    "email": "aayush.cvv@gmail.com",
+    "password": "scrypt:32768:8:1$iaPmRItUsvrov7kf$1003ba5002144c6dabf3f1f56a419320574528f27e931d7d28c736dc8af5b977360442c2904208f853161874fdc78d248ca3e8b60b2dede5aa74d259e28404a5",
+    "security_question": "qq",
+    "security_answer": "qq"
+  }
+]

@@ -1,0 +1,438 @@
+/* ======================================================================= */
+/* THEME: AURORA (Applies to both pages)                                   */
+/* ======================================================================= */
+
+/* --- Base & Typography --- */
+:root {
+    --bg-color: #0c0a0f;
+    --card-bg-color: rgba(23, 20, 29, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f0f0f5;
+    --text-secondary: #a0a0b0;
+    --accent-primary: #8257e5;
+    --accent-secondary: #4ade80;
+    --accent-danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes aurora-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.theme-aurora {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.theme-aurora::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 20%, rgba(130, 87, 229, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 80% 90%, rgba(74, 222, 128, 0.15) 0%, transparent 40%);
+    background-size: 200% 200%;
+    animation: aurora-bg 15s ease infinite;
+    z-index: -1;
+}
+
+.content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+}
+
+
+/* --- Request Form Page --- */
+.form-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2.5rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.card-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.card-header p {
+    color: var(--text-secondary);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(130, 87, 229, 0.3);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.submit-button {
+    width: 100%;
+    background-color: var(--accent-primary);
+    border: none;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+    background-color: #9669f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(130, 87, 229, 0.4);
+}
+
+.success-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: rgba(74, 222, 128, 0.1);
+    color: var(--accent-secondary);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none;
+}
+
+/* --- START: New Notice Board Styles --- */
+.notice-board {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background-color: rgba(130, 87, 229, 0.1);
+    border-left: 4px solid var(--accent-primary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.notice-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.notice-text strong {
+    display: block;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.notice-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+/* --- END: New Notice Board Styles --- */
+
+
+/* --- Admin Dashboard Page --- */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.dashboard-header h1 {
+    font-size: 2.5rem;
+}
+.dashboard-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.requests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+}
+
+@keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-ticket-card {
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    opacity: 0; /* Start hidden for animation */
+    animation: cardFadeIn 0.5s ease-out forwards;
+}
+
+.ticket-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.status-badge {
+    align-self: flex-start;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.status-badge.pending {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--accent-danger);
+}
+.status-badge.completed {
+    background-color: rgba(74, 222, 128, 0.1);
+    color: var(--accent-secondary);
+}
+
+.ticket-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: auto; /* Push details to the bottom */
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.detail-item svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.detail-item a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: text-decoration 0.2s;
+    word-break: break-all;
+}
+.detail-item a:hover {
+    text-decoration: underline;
+}
+
+.ticket-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.action-button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+.action-button.complete:hover {
+    background-color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    color: var(--bg-color);
+}
+.action-button.delete:hover {
+    background-color: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: white;
+}
+
+/* Paste this at the end of your style2.css file */
+
+/* --- ✨ START: Animated Toast Notification Styles ✨ --- */
+.toast-notification {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--accent-secondary);
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    
+    transform: translateX(120%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.toast-notification.show {
+    transform: translateX(0%);
+    opacity: 1;
+    visibility: visible;
+}
+
+.toast-message strong {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+.toast-message span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Checkmark SVG Animation */
+.checkmark {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: var(--accent-secondary); /* Green tick */
+    stroke-miterlimit: 10;
+}
+.toast-notification.show .checkmark {
+    animation: scale .3s ease-in-out .9s both;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: var(--accent-secondary);
+    fill: none;
+}
+.toast-notification.show .checkmark-circle {
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+}
+.toast-notification.show .checkmark-check {
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+/* --- ✨ END: Animated Toast Notification Styles ✨ --- */
+
+
+/* Add this to the end of your style2.css file */
+
+/* --- Style for Home Link --- */
+.home-link {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+    
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background-color: rgba(23, 20, 29, 0.5); /* Semi-transparent bg */
+    transition: all 0.2s ease-in-out;
+}
+
+.home-link:hover {
+    color: var(--text-primary);
+    background-color: var(--card-bg-color);
+    transform: translateY(-2px);
+}
+
+.home-link i {
+    font-size: 1.1rem;
+}

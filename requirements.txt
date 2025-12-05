@@ -1,0 +1,16 @@
+
+Flask==3.1.0
+gunicorn==23.0.0
+
+Flask-SQLAlchemy==3.1.1
+PyMySQL==1.1.0
+Flask_migrate
+
+Flask-WTF==1.2.1
+
+Flask-Mail==0.10.0
+
+
+requests==2.32.3
+python-dotenv==1.0.1
+certifi==2024.12.14
