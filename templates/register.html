@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Create Account - FlixHD</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-xicon" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            redHover: '#c11119',
+                            dark: '#141414',
+                            gray: '#333333',
+                        }
+                    },
+                    animation: {
+                        'float-up': 'floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        floatUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- OTT Background & Layout --- */
+        body {
+            background-color: #000;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Cinematic Background */
+        .ott-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=1931&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        /* Vignette Overlay */
+        .vignette-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.95) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Glass Card --- */
+        .register-card {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        /* --- Pill Inputs --- */
+        .custom-input {
+            width: 100%;
+            background: rgba(22, 22, 22, 0.85);
+            border: 1px solid rgba(100, 100, 100, 0.4);
+            border-radius: 9999px; /* Pill */
+            padding: 14px 24px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-input:focus {
+            background: rgba(50, 50, 50, 0.9);
+            border-color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .custom-input::placeholder { color: #aaa; }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background-color: #e50914;
+            color: white;
+            font-weight: 700;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #c11119;
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+        }
+        .btn-primary:disabled { opacity: 0.7; cursor: wait; }
+
+        /* Autofill Fix */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: white;
+            -webkit-box-shadow: 0 0 0px 1000px #333 inset;
+            transition: background-color 5000s ease-in-out 0s;
+            border-radius: 9999px;
+        }
+
+        /* Toast Animation */
+        .toast-enter { transform: translateX(100%); opacity: 0; }
+        .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toast-exit-active { transform: translateY(-20px); opacity: 0; transition: all 0.3s ease; }
+    </style>
+</head>
+<body>
+
+    <!-- Background Layers -->
+    <div class="ott-background"></div>
+    <div class="vignette-overlay"></div>
+
+    <!-- Header (Logo) -->
+    <header class="absolute top-0 left-0 w-full p-6 md:p-8 z-20 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="group block transition-transform hover:scale-105 duration-300">
+            <div class="text-4xl md:text-5xl font-extrabold tracking-tighter text-brand-red drop-shadow-2xl">
+                Flix<span class="text-white">HD</span>
+            </div>
+        </a>
+        
+        <!-- Mobile Sign In Link -->
+        <a href="{{ url_for('login') }}" class="text-white font-medium text-sm md:text-base hover:underline z-20">Sign In</a>
+    </header>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center w-full px-4 py-24 relative z-10">
+        
+        <!-- Glass Card -->
+        <div class="register-card w-full max-w-[460px] p-8 sm:p-12 rounded-3xl opacity-0 animate-float-up my-auto">
+            
+            <h1 class="text-3xl font-bold mb-6 text-white text-center sm:text-left">Create Account</h1>
+
+            <!-- Hidden Flash Messages -->
+            <div id="flask-messages" class="hidden">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div data-category="{{ category }}" data-message="{{ message }}"></div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm" class="space-y-4">
+                {{ form.hidden_tag() if form }}
+
+                <!-- Username -->
+                <div>
+                    <input type="text" id="username" name="username" class="custom-input" placeholder="Choose a username" value="{{ request.form.username or '' }}" required autofocus>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <input type="email" id="email" name="email" class="custom-input" placeholder="Email address" value="{{ request.form.email or '' }}" required>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <input type="password" id="password" name="password" class="custom-input" placeholder="Password" required>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Security Question -->
+                    <div>
+                        <input type="text" id="security_question" name="security_question" class="custom-input" placeholder="Security Question" value="{{ request.form.security_question or '' }}" required>
+                        <p class="text-[11px] text-[#888] pl-4 mt-1">e.g., First pet's name?</p>
+                    </div>
+
+                    <!-- Security Answer -->
+                    <div>
+                        <input type="text" id="security_answer" name="security_answer" class="custom-input" placeholder="Security Answer" value="{{ request.form.security_answer or '' }}" required>
+                        <p class="text-[11px] text-[#888] pl-4 mt-1">Keep this safe.</p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" id="createAccountButton" class="btn-primary w-full py-3.5 text-lg flex justify-center items-center gap-2 group">
+                        <span id="buttonText">Create Account</span>
+                        <svg id="buttonSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 text-center text-[#737373] text-[15px]">
+                <p>
+                    Already have an account? 
+                    <a href="{{ url_for('login') }}" class="text-white font-medium hover:underline ml-1">Sign In</a>
+                </p>
+                <p class="mt-4 text-[12px] opacity-70 leading-tight">
+                    By clicking Create Account, you agree to our Terms of Use and Privacy Policy.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- OTT Footer -->
+    <footer class="w-full bg-black/80 backdrop-blur-md border-t border-white/10 py-10 relative z-10 mt-auto">
+        <div class="max-w-[1000px] mx-auto px-6 text-[#737373] text-[13px]">
+            <p class="mb-6">Questions? Call 000-800-919-1694</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 mb-6">
+                <a href="#" class="hover:underline">FAQ</a>
+                <a href="#" class="hover:underline">Help Center</a>
+                <a href="#" class="hover:underline">Terms of Use</a>
+                <a href="#" class="hover:underline">Privacy</a>
+                <a href="#" class="hover:underline">Cookie Preferences</a>
+                <a href="#" class="hover:underline">Corporate Information</a>
+            </div>
+            <div class="relative inline-block mb-4">
+                <i data-lucide="globe" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]"></i>
+                <select class="bg-[#141414] border border-[#333] text-[#999] py-2 pl-9 pr-8 rounded-md text-sm appearance-none focus:outline-none focus:border-white cursor-pointer hover:bg-[#1a1a1a]">
+                    <option>English</option>
+                    <option>Español</option>
+                </select>
+                <i data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#999] pointer-events-none"></i>
+            </div>
+            <p class="opacity-70">© 2024 FlixHD Inc.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // --- Custom Toast Logic ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-600/90' : 'bg-green-600/90';
+            const iconName = type === 'error' ? 'alert-triangle' : 'check-circle-2';
+
+            toast.className = `toast-enter pointer-events-auto flex items-center gap-3 ${bgColor} text-white px-6 py-4 rounded-full shadow-2xl backdrop-blur-md min-w-[300px] border border-white/10`;
+            
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                <span class="font-medium text-sm tracking-wide">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.add('toast-enter-active');
+                toast.classList.remove('toast-enter');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('toast-exit-active');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 4500);
+        }
+
+        // Initialize Flask Messages
+        document.addEventListener('DOMContentLoaded', () => {
+            const messages = document.querySelectorAll('#flask-messages div');
+            messages.forEach(msg => showToast(msg.dataset.message, msg.dataset.category));
+        });
+
+        // Form Submit Logic
+        const form = document.getElementById('registerForm');
+        const btn = document.getElementById('createAccountButton');
+        const btnText = document.getElementById('buttonText');
+        const spinner = document.getElementById('buttonSpinner');
+
+        if(form) {
+            form.addEventListener('submit', () => {
+                btn.disabled = true;
+                btnText.textContent = "Creating Account...";
+                spinner.classList.remove('hidden');
+                btn.classList.add('opacity-80', 'cursor-wait');
+            });
+        }
+    </script>
+</body>
+</html>

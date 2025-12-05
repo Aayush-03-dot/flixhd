@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Series: {{ series.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            redHover: '#c11119',
+                            dark: '#0f0f0f',
+                            card: 'rgba(20, 20, 20, 0.85)',
+                            input: 'rgba(255, 255, 255, 0.05)',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #000;
+            color: #e5e5e5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Cinematic Background --- */
+        .cinematic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=1931&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            opacity: 0.3; z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), #000);
+            z-index: -1; backdrop-filter: blur(5px);
+        }
+
+        /* --- Glass Components --- */
+        .glass-panel {
+            background: var(--brand-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .form-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: #e50914;
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+            outline: none;
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e50914; }
+
+        /* --- Custom Modal --- */
+        .modal-overlay {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            opacity: 0; pointer-events: none; transition: all 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+    </style>
+</head>
+<body class="antialiased font-sans flex flex-col">
+
+    <!-- Backgrounds -->
+    <div class="cinematic-bg"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-panel w-full max-w-md p-6 rounded-2xl text-center">
+            <div class="w-16 h-16 rounded-full bg-red-900/30 flex items-center justify-center mx-auto mb-4 text-brand-red">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Are you sure?</h3>
+            <p class="text-gray-400 mb-6" id="modalMessage">This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button id="modalCancel" class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition font-medium">Cancel</button>
+                <button id="modalConfirm" class="px-5 py-2.5 rounded-full bg-brand-red hover:bg-brand-redHover text-white transition font-medium shadow-lg shadow-red-900/40">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 w-full border-b border-white/10 bg-black/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('admin_dashboard') }}" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 hover:text-brand-red transition-all group">
+                    <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold text-white tracking-wide">Edit Series</h1>
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <span class="bg-brand-red/20 text-brand-red px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">Admin</span>
+                        <span>•</span>
+                        <span class="truncate max-w-[150px] md:max-w-xs">{{ series.title }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('admin_dashboard') }}" class="hidden md:flex px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition">
+                    Cancel
+                </a>
+                <button type="submit" form="editSeriesForm" id="saveChangesBtn" class="flex items-center gap-2 px-6 py-2.5 bg-white text-black hover:bg-gray-200 font-bold rounded-full transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-8">
+        <div class="max-w-5xl mx-auto space-y-8 animate-slide-up">
+            
+            <form id="editSeriesForm" method="POST">
+                {{ form.hidden_tag() }}
+
+                <!-- Series Meta Data -->
+                <div class="glass-panel rounded-3xl p-6 md:p-8 mb-8 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i data-lucide="film" class="w-32 h-32 text-white"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i data-lucide="info" class="text-brand-red w-6 h-6"></i> Series Information
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-2">
+                            <label for="title" class="text-sm font-medium text-gray-400 ml-1">Series Title</label>
+                            <input type="text" id="title" name="title" value="{{ series.title or '' }}" required class="form-input w-full rounded-xl px-4 py-3 text-lg font-semibold">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="download_url" class="text-sm font-medium text-gray-400 ml-1">Bulk Download URL</label>
+                            <div class="relative">
+                                <i data-lucide="download-cloud" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                                <input type="url" id="download_url" name="download_url" value="{{ series.download_url or '' }}" placeholder="https://..." class="form-input w-full rounded-xl pl-12 pr-4 py-3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="description" class="text-sm font-medium text-gray-400 ml-1">Synopsis</label>
+                        <textarea id="description" name="description" rows="4" class="form-input w-full rounded-xl px-4 py-3 leading-relaxed">{{ series.description or '' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Content Management Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Seasons & Episodes</h2>
+                        <p class="text-sm text-gray-400">Manage your series structure below.</p>
+                    </div>
+                    <button type="button" id="addSeasonBtn" class="flex items-center gap-2 px-5 py-3 bg-brand-red/10 border border-brand-red/50 text-brand-red hover:bg-brand-red hover:text-white rounded-xl transition-all font-medium group">
+                        <i data-lucide="folder-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                        <span>Add New Season</span>
+                    </button>
+                </div>
+
+                <!-- Seasons Container -->
+                <div id="seasons_container" class="space-y-8 pb-20">
+                    {% for season in series.seasons %}
+                        <!-- Season Card -->
+                        <div class="glass-panel rounded-3xl overflow-hidden season-card animate-fade-in transition-all duration-300 hover:border-white/20" data-season-id="{{ season.id }}">
+                            
+                            <!-- Season Header -->
+                            <div class="bg-white/5 p-4 md:p-5 flex items-center justify-between border-b border-white/5">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="w-8 h-8 rounded-lg bg-brand-red/20 flex items-center justify-center text-brand-red">
+                                        <i data-lucide="layers" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" class="season-title-input bg-transparent border-none text-white font-bold text-lg focus:ring-0 w-full p-0" value="{{ season.title }}">
+                                </div>
+                                <button type="button" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors remove-item-btn" title="Delete Season">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+
+                            <!-- Episodes List -->
+                            <div class="episodes-container p-4 md:p-6 space-y-3">
+                                {% for episode in season.episodes %}
+                                <div class="group relative grid grid-cols-12 gap-3 items-center episode-item bg-black/40 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-all" data-episode-id="{{ episode.id }}">
+                                    <!-- Episode Number -->
+                                    <div class="col-span-2 md:col-span-1">
+                                        <div class="flex flex-col gap-1">
+                                            <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Ep</label>
+                                            <input type="number" class="form-input rounded-lg text-center font-mono text-sm py-2 px-1 episode-number" value="{{ episode.number }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Title -->
+                                    <div class="col-span-10 md:col-span-5">
+                                        <div class="flex flex-col gap-1">
+                                            <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Title</label>
+                                            <input type="text" class="form-input rounded-lg text-sm py-2 px-3 episode-title" value="{{ episode.title or '' }}" placeholder="Episode Title">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Embed -->
+                                    <div class="col-span-11 md:col-span-5">
+                                        <div class="flex flex-col gap-1">
+                                            <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Embed / URL</label>
+                                            <div class="relative">
+                                                <i data-lucide="link" class="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500"></i>
+                                                <input type="text" class="form-input rounded-lg text-sm py-2 pl-7 pr-3 episode-embed font-mono text-xs text-blue-300" value="{{ episode.embed_code or '' }}" placeholder="<iframe> or URL">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Delete Episode -->
+                                    <div class="col-span-1 md:col-span-1 flex justify-end">
+                                        <button type="button" class="mt-4 p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors remove-item-btn">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+
+                                <!-- Add Episode Button Wrapper -->
+                                <div class="add-episode-btn-wrapper pt-4 flex justify-center border-t border-white/5 mt-2 border-dashed">
+                                     <button type="button" class="add-episode-btn flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-sm text-gray-300 hover:text-white transition-all">
+                                         <i data-lucide="plus" class="w-4 h-4"></i>
+                                         <span>Add Episode</span>
+                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        lucide.createIcons();
+
+        const seasonsContainer = document.getElementById('seasons_container');
+        const addSeasonBtn = document.getElementById('addSeasonBtn');
+        const form = document.getElementById('editSeriesForm');
+
+        // --- Custom Notifications (Toast) ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-600' : 'bg-green-600';
+            const iconName = type === 'error' ? 'alert-octagon' : 'check-circle';
+
+            toast.className = `pointer-events-auto flex items-center gap-3 ${bgColor} text-white px-5 py-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[300px] animate-slide-up`;
+            toast.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Custom Modal (Confirm) ---
+        let confirmCallback = null;
+        const modal = document.getElementById('confirmModal');
+        const modalMsg = document.getElementById('modalMessage');
+        const modalYes = document.getElementById('modalConfirm');
+        const modalNo = document.getElementById('modalCancel');
+
+        function showConfirm(message, callback) {
+            modalMsg.textContent = message;
+            confirmCallback = callback;
+            modal.classList.add('active');
+        }
+
+        modalNo.onclick = () => { modal.classList.remove('active'); confirmCallback = null; };
+        modalYes.onclick = () => { 
+            if(confirmCallback) confirmCallback(); 
+            modal.classList.remove('active'); 
+        };
+
+        // --- HTML Templates ---
+        function createEpisodeHTML(number) {
+            return `
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Ep</label>
+                        <input type="number" class="form-input rounded-lg text-center font-mono text-sm py-2 px-1 episode-number" value="${number}">
+                    </div>
+                </div>
+                <div class="col-span-10 md:col-span-5">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Title</label>
+                        <input type="text" class="form-input rounded-lg text-sm py-2 px-3 episode-title" placeholder="Episode Title">
+                    </div>
+                </div>
+                <div class="col-span-11 md:col-span-5">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-500 ml-1">Embed / URL</label>
+                        <div class="relative">
+                            <i data-lucide="link" class="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500"></i>
+                            <input type="text" class="form-input rounded-lg text-sm py-2 pl-7 pr-3 episode-embed font-mono text-xs text-blue-300" placeholder="<iframe> or URL">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-1 md:col-span-1 flex justify-end">
+                    <button type="button" class="mt-4 p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors remove-item-btn">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        const addEpisode = (episodesContainer) => {
+            const existingNumbers = Array.from(episodesContainer.querySelectorAll('.episode-number'))
+                                         .map(input => parseInt(input.value) || 0);
+            const nextNum = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+
+            const div = document.createElement('div');
+            div.className = 'group relative grid grid-cols-12 gap-3 items-center episode-item bg-black/40 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-all animate-fade-in';
+            div.innerHTML = createEpisodeHTML(nextNum);
+
+            const wrapper = episodesContainer.querySelector('.add-episode-btn-wrapper');
+            episodesContainer.insertBefore(div, wrapper);
+            lucide.createIcons();
+            div.querySelector('.episode-title').focus();
+        };
+
+        // --- Event Delegation ---
+        seasonsContainer.addEventListener('click', function(e) {
+            const addBtn = e.target.closest('.add-episode-btn');
+            const removeBtn = e.target.closest('.remove-item-btn');
+
+            if (addBtn) {
+                addEpisode(addBtn.closest('.episodes-container'));
+            }
+            if (removeBtn) {
+                const item = removeBtn.closest('.season-card') || removeBtn.closest('.episode-item');
+                const type = item.classList.contains('season-card') ? 'Season' : 'Episode';
+                
+                showConfirm(`Delete this ${type}? This cannot be undone immediately.`, () => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        item.remove();
+                        // Re-index episodes if an episode was removed
+                        if(type === 'Episode') {
+                            // Logic to re-number could go here if desired
+                        }
+                    }, 300);
+                });
+            }
+        });
+
+        // Add Season
+        addSeasonBtn.addEventListener('click', function() {
+            const count = seasonsContainer.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'glass-panel rounded-3xl overflow-hidden season-card animate-slide-up transition-all duration-300 hover:border-white/20';
+            div.innerHTML = `
+                <div class="bg-white/5 p-4 md:p-5 flex items-center justify-between border-b border-white/5">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-8 h-8 rounded-lg bg-brand-red/20 flex items-center justify-center text-brand-red">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" class="season-title-input bg-transparent border-none text-white font-bold text-lg focus:ring-0 w-full p-0" value="Season ${count}">
+                    </div>
+                    <button type="button" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors remove-item-btn" title="Delete Season">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="episodes-container p-4 md:p-6 space-y-3">
+                    <div class="add-episode-btn-wrapper pt-4 flex justify-center border-t border-white/5 mt-2 border-dashed">
+                            <button type="button" class="add-episode-btn flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-sm text-gray-300 hover:text-white transition-all">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Add Episode</span>
+                            </button>
+                    </div>
+                </div>
+            `;
+            seasonsContainer.appendChild(div);
+            // Add first episode automatically
+            addEpisode(div.querySelector('.episodes-container'));
+            lucide.createIcons();
+            div.querySelector('.season-title-input').focus();
+        });
+
+        // Form Submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveChangesBtn');
+            const originalContent = saveBtn.innerHTML;
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Saving...</span>`;
+
+            // Build Payload
+            const payload = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                download_url: document.getElementById('download_url').value,
+                seasons: []
+            };
+
+            document.querySelectorAll('.season-card').forEach(seasonEl => {
+                const sData = {
+                    id: seasonEl.dataset.seasonId || null,
+                    title: seasonEl.querySelector('.season-title-input').value,
+                    episodes: []
+                };
+                seasonEl.querySelectorAll('.episode-item').forEach(epEl => {
+                    sData.episodes.push({
+                        id: epEl.dataset.episodeId || null,
+                        number: parseInt(epEl.querySelector('.episode-number').value),
+                        title: epEl.querySelector('.episode-title').value,
+                        embed_code: epEl.querySelector('.episode-embed').value,
+                    });
+                });
+                payload.seasons.push(sData);
+            });
+
+            // Fetch Request
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': form.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Series updated successfully!');
+                    setTimeout(() => window.location.href = data.redirect || "{{ url_for('admin_dashboard') }}", 1000);
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(err => {
+                showToast('Error: ' + err.message, 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalContent;
+                lucide.createIcons();
+            });
+        });
+    });
+    </script>
+</body>
+</html>

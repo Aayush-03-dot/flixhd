@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Sign In - FlixHD</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            redHover: '#c11119',
+                            dark: '#141414',
+                            gray: '#333333',
+                        }
+                    },
+                    animation: {
+                        'float-up': 'floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        floatUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- OTT Background Layout --- */
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: transparent; /* Important for seeing the fixed bg */
+        }
+
+        /* 
+           background-image: Using a reliable Unsplash 'Cinema' image. 
+           If you want the Netflix 'Poster' look, you must host that image yourself 
+           as their links expire frequently. 
+        */
+        .ott-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=1931&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -2; /* Sits behind everything */
+        }
+
+        /* Dark overlay to make text readable */
+        .vignette-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.5) 0%, 
+                rgba(0,0,0,0.4) 40%, 
+                rgba(0,0,0,0.9) 100%
+            ),
+            radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Glass Card --- */
+        .login-card {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+        }
+
+        /* --- Inputs (Pill Shape) --- */
+        .custom-input {
+            width: 100%;
+            background: rgba(22, 22, 22, 0.85);
+            border: 1px solid rgba(100, 100, 100, 0.4);
+            border-radius: 9999px; 
+            padding: 16px 24px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-input:focus {
+            background: rgba(50, 50, 50, 0.9);
+            border-color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .custom-input::placeholder { color: #aaa; }
+
+        /* Browser autofill style override */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: white;
+            -webkit-box-shadow: 0 0 0px 1000px #333 inset;
+            transition: background-color 5000s ease-in-out 0s;
+            border-radius: 9999px;
+        }
+
+        .toast-enter { transform: translateX(100%); opacity: 0; }
+        .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toast-exit-active { transform: translateY(-20px); opacity: 0; transition: all 0.3s ease; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Background Image -->
+    <div class="ott-background"></div>
+    
+    <!-- 2. Dark Overlay -->
+    <div class="vignette-overlay"></div>
+
+    <!-- Header (Logo) -->
+    <header class="absolute top-0 left-0 w-full p-6 md:p-10 z-20 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="group block transition-transform hover:scale-105 duration-300">
+            <div class="text-4xl md:text-5xl font-extrabold tracking-tighter text-brand-red drop-shadow-2xl">
+                Flix<span class="text-white">HD</span>
+            </div>
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center w-full px-4 py-24 relative z-10">
+        
+        <div class="login-card w-full max-w-[440px] p-8 sm:p-14 rounded-3xl opacity-0 animate-float-up">
+            
+            <h1 class="text-3xl font-bold mb-8 text-white">Sign In</h1>
+
+            <div id="flask-messages" class="hidden">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div data-category="{{ category }}" data-message="{{ message }}"></div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            
+            <form method="POST" action="{{ url_for('login') }}" id="loginForm" class="space-y-6">
+                {{ form.hidden_tag() if form }}
+                
+                <div class="relative group">
+                    <input type="email" id="email" name="email" class="custom-input" placeholder="Email or mobile number" required autofocus>
+                </div>
+
+                <div class="relative">
+                    <input type="password" id="password" name="password" class="custom-input" placeholder="Password" required>
+                </div>
+
+                <button type="submit" id="signInButton" class="w-full bg-brand-red hover:bg-brand-redHover text-white font-bold text-lg py-3.5 rounded-full transition-all duration-300 transform active:scale-95 shadow-lg shadow-red-900/40 flex justify-center items-center mt-2 group">
+                    <span id="buttonText">Sign In</span>
+                    <svg id="buttonSpinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+
+                <div class="flex justify-between items-center text-sm text-[#b3b3b3] px-2">
+                    <div class="flex items-center gap-2 group cursor-pointer">
+                        <input type="checkbox" id="remember" class="w-4 h-4 rounded-sm bg-[#333] border-none focus:ring-0 accent-brand-red cursor-pointer">
+                        <label for="remember" class="cursor-pointer group-hover:text-white transition-colors select-none">Remember me</label>
+                    </div>
+                    <a href="{{ url_for('forgot_password') }}" class="hover:underline hover:text-white transition-colors">Need help?</a>
+                </div>
+            </form>
+
+            <div class="mt-12 text-[#737373]">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-px bg-gray-600/50 flex-1"></div>
+                    <span class="text-xs font-medium tracking-wide">OR</span>
+                    <div class="h-px bg-gray-600/50 flex-1"></div>
+                </div>
+
+                <button type="button" class="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 rounded-full flex items-center justify-center gap-3 transition-colors backdrop-blur-sm border border-white/10">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                    <span>Sign in with Google</span>
+                </button>
+
+                <div class="mt-8 px-2">
+                    <p class="text-[16px]">
+                        New to FlixHD? 
+                        <a href="{{ url_for('register') }}" class="text-white font-medium hover:underline ml-1">Sign up now</a>.
+                    </p>
+                    <p class="mt-4 text-[12px] leading-tight opacity-70">
+                        This page is protected by Google reCAPTCHA to ensure you're not a bot. 
+                        <a href="#" class="text-blue-500 hover:underline">Learn more.</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Footer -->
+    <footer class="w-full bg-black/80 backdrop-blur-md border-t border-white/10 py-10 relative z-10 mt-auto">
+        <div class="max-w-[1000px] mx-auto px-6 text-[#737373] text-[13px]">
+            <p class="mb-6">Questions? Call 000-800-919-1694</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 mb-6">
+                <a href="#" class="hover:underline">FAQ</a>
+                <a href="#" class="hover:underline">Help Center</a>
+                <a href="#" class="hover:underline">Terms of Use</a>
+                <a href="#" class="hover:underline">Privacy</a>
+                <a href="#" class="hover:underline">Cookie Preferences</a>
+                <a href="#" class="hover:underline">Corporate Information</a>
+            </div>
+            <div class="relative inline-block mb-4">
+                <i data-lucide="globe" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]"></i>
+                <select class="bg-[#141414] border border-[#333] text-[#999] py-2 pl-9 pr-8 rounded-md text-sm appearance-none focus:outline-none focus:border-white cursor-pointer hover:bg-[#1a1a1a]">
+                    <option>English</option>
+                    <option>Español</option>
+                </select>
+                <i data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#999] pointer-events-none"></i>
+            </div>
+            <p class="opacity-70">© 2024 FlixHD Inc.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-enter pointer-events-auto flex items-center gap-3 ${type === 'error' ? 'bg-red-600/90' : 'bg-green-600/90'} text-white px-6 py-4 rounded-full shadow-2xl backdrop-blur-md min-w-[300px] border border-white/10`;
+            const iconName = type === 'error' ? 'alert-triangle' : 'check-circle-2';
+            toast.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i><span class="font-medium text-sm tracking-wide">${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            requestAnimationFrame(() => { toast.classList.add('toast-enter-active'); toast.classList.remove('toast-enter'); });
+            setTimeout(() => { toast.classList.add('toast-exit-active'); toast.addEventListener('transitionend', () => toast.remove()); }, 4500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const messages = document.querySelectorAll('#flask-messages div');
+            messages.forEach(msg => showToast(msg.dataset.message, msg.dataset.category));
+        });
+
+        const loginForm = document.getElementById('loginForm');
+        const btn = document.getElementById('signInButton');
+        const btnText = document.getElementById('buttonText');
+        const spinner = document.getElementById('buttonSpinner');
+
+        if(loginForm) {
+            loginForm.addEventListener('submit', () => {
+                btn.disabled = true;
+                btnText.textContent = "Signing In...";
+                spinner.classList.remove('hidden');
+                btn.classList.add('opacity-80', 'cursor-wait');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>FlixHD - Premium Streaming</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Alpine JS -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/flixhd.png') }}">
+
+    <style>
+        :root {
+            /* CHANGED: Pitch Black Background */
+            --bg-main: #000000;
+            --brand-red: #E50914;
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+            --font-main: 'Outfit', sans-serif;
+            --nav-height: 68px;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            margin: 0; padding: 0;
+        }
+
+        /* --- 1. NAVIGATION --- */
+        .navbar {
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 10%, transparent);
+            padding: 0 4%;
+            height: var(--nav-height);
+            transition: background-color 0.4s ease;
+            z-index: 1000;
+        }
+        .navbar.scrolled {
+            /* CHANGED: Pitch Black on Scroll */
+            background-color: #000000;
+            box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .navbar-brand {
+            font-weight: 900; font-size: 1.8rem; color: var(--brand-red) !important;
+            letter-spacing: 1px; margin-right: 2rem;
+        }
+        .navbar-brand span { color: white; }
+        .nav-link {
+            color: #e5e5e5 !important; font-size: 0.9rem; font-weight: 500; transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active { color: white !important; font-weight: 700; }
+
+        .search-container { position: relative; }
+        .search-input {
+            background: rgba(20,20,20,0.8); border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 5px 10px 5px 35px; border-radius: 4px;
+            width: 240px; font-size: 0.9rem; transition: all 0.3s;
+        }
+        .search-input:focus { background: black; border-color: white; outline: none; width: 280px; }
+        .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #ccc; pointer-events: none; }
+
+        /* --- 2. HERO / BILLBOARD --- */
+        .hero-section {
+            height: 85vh; min-height: 500px; position: relative;
+            display: flex; align-items: center; margin-bottom: 20px;
+        }
+        .hero-backdrop-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        }
+        .hero-backdrop {
+            width: 100%; height: 100%; object-fit: cover;
+            /* Fade into pitch black */
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            /* Gradients updated to blend with pitch black */
+            background: radial-gradient(circle at 70% 20%, transparent 0%, #000000 120%),
+                        linear-gradient(to right, #000000 0%, transparent 60%);
+        }
+        .hero-content {
+            z-index: 10; padding-left: 4%; max-width: 650px;
+            margin-top: var(--nav-height);
+        }
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+        }
+        .hero-meta {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem;
+            font-weight: 600; color: #ccc;
+        }
+        .quality-badge { border: 1px solid #ccc; padding: 0 4px; font-size: 0.7rem; border-radius: 2px; color: #ccc; }
+        .hero-desc {
+            font-size: 1.1rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            margin-bottom: 1.5rem;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .btn-action {
+            padding: 0.7rem 2rem; border-radius: 4px; font-weight: 700; font-size: 1.1rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
+            transition: all 0.2s; border: none;
+        }
+        .btn-play { background: white; color: black; }
+        .btn-play:hover { background: rgba(255,255,255,0.75); color: black; }
+        .btn-more { background: rgba(109, 109, 110, 0.7); color: white; }
+        .btn-more:hover { background: rgba(109, 109, 110, 0.4); color: white; }
+
+        /* --- 3. MOVIE SECTIONS --- */
+        .content-section {
+            padding: 2rem 4%; 
+            margin-bottom: 1rem;
+        }
+        
+        .section-header {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: #e5e5e5; margin: 0; }
+        .section-link { color: #54b9f5; text-decoration: none; font-size: 0.9rem; }
+        .section-link:hover { text-decoration: underline; color: white; }
+
+        /* Grid Layout (Default) */
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .movie-card {
+            display: block;
+            text-decoration: none;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .card-img-container {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            background-color: #1a1a1a; /* Slightly lighter than pitch black so we see placeholder */
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .movie-poster {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .movie-card:hover { transform: translateY(-10px); z-index: 2; }
+        .movie-card:hover .movie-poster { filter: brightness(1.1); transform: scale(1.05); }
+
+        .movie-info { padding-top: 10px; }
+        .movie-title {
+            color: white; font-size: 0.9rem; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin: 0;
+        }
+        .movie-meta { color: #888; font-size: 0.8rem; margin: 0; }
+
+        /* Footer */
+        .site-footer { margin-top: 4rem; padding: 3rem 4%; border-top: 1px solid #333; color: #777; background-color: #000000; }
+        .footer-links a { color: #777; text-decoration: none; display: block; margin-bottom: 5px; }
+        .footer-links a:hover { color: white; }
+        .pagination .page-link { background: transparent; border: 1px solid #333; color: white; }
+        .pagination .page-item.active .page-link { background: var(--brand-red); border-color: var(--brand-red); }
+
+        /* --- MOBILE SPECIFIC CSS --- */
+        @media (max-width: 768px) {
+            
+            .navbar { height: auto; min-height: var(--nav-height); }
+            
+            .navbar-collapse {
+                /* CHANGED: Pitch Black Mobile Menu */
+                background-color: #000000;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: 10px;
+                box-shadow: 0 10px 30px rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+            .search-input { width: 100% !important; }
+            .navbar-nav { margin-bottom: 1rem; }
+
+            .hero-title { font-size: 2.5rem; }
+            .hero-section { height: 70vh; }
+
+            /* --- CAROUSEL LOGIC --- */
+            .movie-grid.mobile-scroll {
+                display: flex;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                gap: 1rem;
+                padding-bottom: 1rem;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            .movie-grid.mobile-scroll::-webkit-scrollbar { display: none; }
+
+            .movie-grid.mobile-scroll .movie-card {
+                flex: 0 0 130px;
+                width: 130px;
+                scroll-snap-align: start;
+                transform: none !important;
+            }
+            
+            .movie-grid:not(.mobile-scroll) {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 1. NAVIGATION -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid p-0">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Flix<span>HD</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#netflixNav" style="filter: invert(1);">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="netflixNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link {% if not category or category == 'all' %}active{% endif %}" href="{{ url_for('index') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link {% if category == 'all-series' %}active{% endif %}" href="{{ url_for('index', category='all-series') }}">TV Shows</a></li>
+                <li class="nav-item"><a class="nav-link {% if category == 'all-movies' %}active{% endif %}" href="{{ url_for('index', category='all-movies') }}">Movies</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-3 flex-column flex-lg-row">
+                <form action="{{ url_for('index') }}" method="get" class="search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" name="search_query" class="search-input" placeholder="Search..." value="{{ search_query or '' }}">
+                </form>
+                {% if session.user %}
+                <div class="dropdown w-100 w-lg-auto">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4 me-2"></i> {{ session.user }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                        {% if session.get('user_role') == 'admin' %}
+                        <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{{ url_for('user_logout') }}">Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-danger btn-sm px-3 fw-bold w-100 w-lg-auto">Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- 2. HERO SECTION -->
+{% if featured_item and not search_query %}
+<header class="hero-section">
+    <div class="hero-backdrop-container">
+        <img src="{{ featured_item.backdrop_display }}" alt="{{ featured_item.title }}" class="hero-backdrop" onerror="this.style.display='none'">
+        <div class="hero-overlay"></div>
+    </div>
+    <div class="container-fluid p-0">
+        <div class="hero-content">
+            <h1 class="hero-title">{{ featured_item.title }}</h1>
+            <div class="hero-meta">
+                <span class="text-success fw-bold">98% Match</span>
+                <span>{{ featured_item.release_date[:4] if featured_item.release_date else '2025' }}</span>
+                <span class="quality-badge">HD</span>
+            </div>
+            <p class="hero-desc">{{ featured_item.description | truncate(200) }}</p>
+            <div class="d-flex gap-3 mt-4">
+                <a href="{{ url_for('series_detail', series_id=featured_item.id) if featured_item.content_type == 'series' else url_for('movie_detail', movie_id=featured_item.id) }}" class="btn-action btn-play">
+                    <i class="bi bi-play-fill fs-4"></i> Play
+                </a>
+                <a href="{{ url_for('series_detail', series_id=featured_item.id) if featured_item.content_type == 'series' else url_for('movie_detail', movie_id=featured_item.id) }}" class="btn-action btn-more">
+                    <i class="bi bi-info-circle fs-5"></i> More Info
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+{% else %}
+<div style="height: 100px;"></div>
+{% endif %}
+
+
+<!-- 3. MAIN CONTENT -->
+<main>
+
+    {# --- SECTION 1: NEW RELEASES --- #}
+    {% if new_releases %}
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">New Releases</h2>
+            <a href="{{ url_for('index', category='all') }}" class="section-link">See All</a>
+        </div>
+        <div class="movie-grid mobile-scroll">
+            {% for item in new_releases %}
+            <a href="{{ url_for('series_detail', series_id=item.id) if item.content_type == 'series' else url_for('movie_detail', movie_id=item.id) }}" class="movie-card">
+                <div class="card-img-container">
+                    <img src="{{ item.thumbnail_display }}" alt="{{ item.title }}" class="movie-poster" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a1a/FFF?text=No+Image'">
+                </div>
+                <div class="movie-info">
+                    <p class="movie-title">{{ item.title }}</p>
+                    <p class="movie-meta">{{ item.release_date[:4] if item.release_date else '' }} • {{ item.content_type|title }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {# --- SECTION 2: HORROR --- #}
+    {% if horror_content %}
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Horror Central</h2>
+            <a href="{{ url_for('index', category='Horror') }}" class="section-link">See All Horror</a>
+        </div>
+        <div class="movie-grid mobile-scroll">
+            {% for item in horror_content %}
+            <a href="{{ url_for('series_detail', series_id=item.id) if item.content_type == 'series' else url_for('movie_detail', movie_id=item.id) }}" class="movie-card">
+                <div class="card-img-container">
+                    <img src="{{ item.thumbnail_display }}" alt="{{ item.title }}" class="movie-poster" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a1a/FFF?text=No+Image'">
+                </div>
+                <div class="movie-info">
+                    <p class="movie-title">{{ item.title }}</p>
+                    <p class="movie-meta">{{ item.release_date[:4] if item.release_date else '' }} • {{ item.content_type|title }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {# --- SECTION 3: CRIME --- #}
+    {% if crime_content %}
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Crime Thrillers</h2>
+            <a href="{{ url_for('index', category='Crime') }}" class="section-link">See All Crime</a>
+        </div>
+        <div class="movie-grid mobile-scroll">
+            {% for item in crime_content %}
+            <a href="{{ url_for('series_detail', series_id=item.id) if item.content_type == 'series' else url_for('movie_detail', movie_id=item.id) }}" class="movie-card">
+                <div class="card-img-container">
+                    <img src="{{ item.thumbnail_display }}" alt="{{ item.title }}" class="movie-poster" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a1a/FFF?text=No+Image'">
+                </div>
+                <div class="movie-info">
+                    <p class="movie-title">{{ item.title }}</p>
+                    <p class="movie-meta">{{ item.release_date[:4] if item.release_date else '' }} • {{ item.content_type|title }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {# --- SECTION 4: ACTION --- #}
+    {% if action_content %}
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Action Packed</h2>
+            <a href="{{ url_for('index', category='Action') }}" class="section-link">See All Action</a>
+        </div>
+        <div class="movie-grid mobile-scroll">
+            {% for item in action_content %}
+            <a href="{{ url_for('series_detail', series_id=item.id) if item.content_type == 'series' else url_for('movie_detail', movie_id=item.id) }}" class="movie-card">
+                <div class="card-img-container">
+                    <img src="{{ item.thumbnail_display }}" alt="{{ item.title }}" class="movie-poster" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a1a/FFF?text=No+Image'">
+                </div>
+                <div class="movie-info">
+                    <p class="movie-title">{{ item.title }}</p>
+                    <p class="movie-meta">{{ item.release_date[:4] if item.release_date else '' }} • {{ item.content_type|title }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {# --- SECTION 5: TRENDING / SEARCH RESULTS (Main Grid) --- #}
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                {% if search_query %} Results for "{{ search_query }}"
+                {% elif category and category != 'all' %} {{ category|title }}
+                {% else %} Trending Now {% endif %}
+            </h2>
+        </div>
+
+        {% if pagination.items %}
+        <div class="movie-grid">
+            {% for item in pagination.items %}
+            <a href="{{ url_for('series_detail', series_id=item.id) if item.content_type == 'series' else url_for('movie_detail', movie_id=item.id) }}" class="movie-card">
+                <div class="card-img-container">
+                    <img src="{{ item.thumbnail_display }}" alt="{{ item.title }}" class="movie-poster" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a1a/FFF?text=No+Image'">
+                </div>
+                <div class="movie-info">
+                    <p class="movie-title">{{ item.title }}</p>
+                    <p class="movie-meta">{{ item.release_date[:4] if item.release_date else '' }} • {{ item.content_type|title }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav class="mt-5 d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('index', page=pagination.prev_num, search_query=search_query, category=category) if pagination.has_prev else '#' }}">&laquo;</a>
+                </li>
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('index', page=page_num, search_query=search_query, category=category) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('index', page=pagination.next_num, search_query=search_query, category=category) if pagination.has_next else '#' }}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+            <p class="text-center text-muted mt-5">No content found.</p>
+        {% endif %}
+    </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <h5 class="text-white mb-3">FlixHD</h5>
+                <p class="small">The best streaming platform for all your favorite movies and series.</p>
+            </div>
+            <div class="col-md-3 footer-links">
+                <h6 class="text-uppercase fw-bold mb-3">Browse</h6>
+                <a href="#">Movies</a>
+                <a href="#">Series</a>
+                <a href="#">New Releases</a>
+            </div>
+            <div class="col-md-3 footer-links">
+                <h6 class="text-uppercase fw-bold mb-3">Help</h6>
+                <a href="#">Account</a>
+                <a href="#">Support</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="col-md-3">
+                <h6 class="text-uppercase fw-bold mb-3">Legal</h6>
+                <p class="small">All rights reserved. &copy; 2025.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('.navbar');
+        if (window.scrollY > 50) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
+    });
+</script>
+</body>
+</html>
